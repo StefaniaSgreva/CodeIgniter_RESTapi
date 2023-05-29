@@ -36,4 +36,43 @@ class Blog extends ResourceController
             return $this->respondCreated($data);//generate http code 201
         }
     }
+
+    public function show($id = null){
+        $data = $this->model->find($id);
+        return $this->respond($data);
+    }
+
+    public function update($id = null){
+        helper(['form']);
+
+        $rules = [
+            'title' => 'required|min_length[6]',
+            'description' => 'required'
+        ];
+
+        if(!$this->validate($rules)){
+            return $this->fail($this->validator->getErrors());
+        }else{
+            $input = $this->request->getRawInput();//give back an array of falues you posted
+            $data = [
+                'post_id' => $id,
+                'post_title' => $input['title'],
+                'post_description' => $input['description'],
+            ];
+
+            $this->model->save($data);
+
+            return $this->respond($data);
+        }
+    }
+
+    public function delete($id = null){
+        $data = $this->model->find($id);
+        if($data){
+            $this->model->delete($id);
+            return $this->respondDeleted($data);
+        }else{
+            return $this->failNotFound('Item not found');
+        }
+    }
 }
